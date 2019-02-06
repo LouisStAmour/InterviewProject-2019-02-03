@@ -1,3 +1,6 @@
+# InterviewProject-2019-02-03
+Based on React Webpack Typescript Starter, as documented below. See `redux/` folder for Redux components written and type-checked using TypeScript, and `components/` for the app's components (currently with hardcoded data saved to `tests/__fixtures__`)
+
 # React Webpack Typescript Starter
 > Minimal starter with hot module replacement (HMR) for rapid development.
 
