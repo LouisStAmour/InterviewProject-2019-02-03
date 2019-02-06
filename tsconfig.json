@@ -6,7 +6,11 @@
     "module": "commonjs",
     "target": "es5",
     "jsx": "react",
-    "lib": ["es2018", "dom"]
+    "lib": ["es2018", "dom"],
+    "forceConsistentCasingInFileNames": true,
+    "noImplicitReturns": true,
+    "strict": true, // noImplicitAny, noImplicitThis, alwaysStrict and strictNullChecks
+    "noUnusedLocals": true
   },
   "include": ["./src/**/*"],
   "awesomeTypescriptLoaderOptions": {
