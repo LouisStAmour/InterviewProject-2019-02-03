@@ -1,15 +1,34 @@
-export interface ICMCMapRequest {
-  /* string - Only active coins are returned by default. Pass 'inactive' to get a list of coins that are no longer active. */
-  listing_status?: "active" | "inactive";
-  /* integer >1 - Optionally offset the start (1-based index) of the paginated list of items to return. */
-  start?: number;
-  /* integer [ 1 .. 5000 ] - Optionally specify the number of results to return. Use this parameter and the "start" parameter to determine your own pagination size. */
-  limit?: number;
-  /* string - Optionally pass a comma-separated list of cryptocurrency symbols to return CoinMarketCap IDs for. If this option is passed, other options will be ignored. */
-  symbol?: string;
-}
+import {
+  Types,
+  IAction,
+  ICMCIDFetch,
+  ICMCIDFetchSucceeded,
+  ICMCIDFetchFailed,
+  cmcIdFetchSucceeded,
+  cmcIdFetchFailed,
+  ICMCQuotesFetch,
+  ICMCQuotesFetchSucceeded,
+  ICMCQuotesFetchFailed,
+  cmcQuotesFetchSucceeded,
+  cmcQuotesFetchFailed
+} from "./actions";
+import { Epic, ofType } from "redux-observable";
+import { ajax } from "rxjs/ajax";
+import { mergeMap, map, catchError } from "rxjs/operators";
+import { Observable, of } from "rxjs";
 
-export interface ICMCMapData {
+// export interface ICMCIDRequest {
+//   /* string - Only active coins are returned by default. Pass 'inactive' to get a list of coins that are no longer active. */
+//   listing_status?: "active" | "inactive";
+//   /* integer >1 - Optionally offset the start (1-based index) of the paginated list of items to return. */
+//   start?: number;
+//   /* integer [ 1 .. 5000 ] - Optionally specify the number of results to return. Use this parameter and the "start" parameter to determine your own pagination size. */
+//   limit?: number;
+//   /* string - Optionally pass a comma-separated list of cryptocurrency symbols to return CoinMarketCap IDs for. If this option is passed, other options will be ignored. */
+//   symbol?: string;
+// }
+
+export interface ICMCIDData {
   /* integer - The unique CoinMarketCap ID for this cryptocurrency */
   id: number;
   /* string - The name of this cryptocurrency. */
@@ -27,14 +46,16 @@ export interface ICMCMapData {
   /* Metadata about the parent cryptocurrency platform this cryptocurrency belongs to if it is a token, otherwise null. */
   platform: any;
 }
-export interface ICMCQuoteRequest {
-  /* string - One or more comma-separated cryptocurrency CoinMarketCap IDs. Example: 1,2 */
-  id?: string;
-  /* string - Alternatively pass one or more comma-separated cryptocurrency symbols. Example: "BTC,ETH". At least one "id" or "symbol" is required. */
-  symbol?: string;
-  /* string (default: "USD") - Optionally calculate market quotes in up to 40 currencies at once by passing a comma-separated list of cryptocurrency or fiat currency symbols. Each additional convert option beyond the first requires an additional call credit. A list of supported fiat options can be found [here](https://coinmarketcap.com/api/documentation/v1/#section/Standards-and-Conventions). Each conversion is returned in its own "quote" object. */
-  convert?: string;
-}
+
+// export interface ICMCQuoteRequest {
+//   /* string - One or more comma-separated cryptocurrency CoinMarketCap IDs. Example: 1,2 */
+//   id?: string;
+//   /* string - Alternatively pass one or more comma-separated cryptocurrency symbols. Example: "BTC,ETH". At least one "id" or "symbol" is required. */
+//   symbol?: string;
+//   /* string (default: "USD") - Optionally calculate market quotes in up to 40 currencies at once by passing a comma-separated list of cryptocurrency or fiat currency symbols. Each additional convert option beyond the first requires an additional call credit. A list of supported fiat options can be found [here](https://coinmarketcap.com/api/documentation/v1/#section/Standards-and-Conventions). Each conversion is returned in its own "quote" object. */
+//   convert?: string;
+// }
+
 export interface ICMCQuoteData {
   id: number;
   name: string;
@@ -63,7 +84,7 @@ export interface ICMCQuoteData {
 
 export interface ICMCStatus {
   /* the current time on the server when the call was executed */
-  timestamp: string;
+  timestamp?: string;
   /* Standard HTTP Error Codes:
    * 0 if successful
    * 400 (Bad Request) The server could not process the request, likely due to an invalid argument.
@@ -78,6 +99,84 @@ export interface ICMCStatus {
    * null if successful
    */
   error_message: string | null;
-  elapsed: number;
-  credit_count: number;
+  elapsed?: number;
+  credit_count?: number;
 }
+
+export interface ICMCIDResponse {
+  status: ICMCStatus;
+  data: ICMCIDData[];
+}
+
+export interface ICMCQuoteResponse {
+  status: ICMCStatus;
+  data: {
+    [id: string]: ICMCQuoteData;
+  };
+}
+
+export const cmcIdEpic: Epic<IAction> = action$ =>
+  action$.pipe(
+    ofType<IAction, ICMCIDFetch>(Types.CMC_ID_FETCH),
+    mergeMap<ICMCIDFetch, Observable<ICMCIDFetchSucceeded | ICMCIDFetchFailed>>(
+      action =>
+        ajax
+          .getJSON<ICMCIDResponse>(
+            `http://localhost:8080/coinmarketcap/v1/cryptocurrency/map?listing_status=active&limit=${
+              action.limit > 0 && action.limit < 5000 ? action.limit : 10
+            }`
+          )
+          .pipe(
+            map(
+              ({ status, data }) =>
+                status.error_code === 0
+                  ? cmcIdFetchSucceeded(data.map(d => d.id))
+                  : cmcIdFetchFailed(action, status),
+              catchError(error =>
+                of(
+                  cmcIdFetchFailed(action, {
+                    error_code: -1,
+                    error_message: navigator.onLine
+                      ? "Please connect to the Internet and try again."
+                      : "Sorry, something went wrong."
+                  })
+                )
+              )
+            )
+          )
+    )
+  );
+
+export const cmcQuoteEpic: Epic<IAction> = action$ =>
+  action$.pipe(
+    ofType<IAction, ICMCQuotesFetch>(Types.CMC_QUOTES_FETCH),
+    mergeMap<
+      ICMCQuotesFetch,
+      Observable<ICMCQuotesFetchSucceeded | ICMCQuotesFetchFailed>
+    >(action =>
+      ajax
+        .getJSON<ICMCQuoteResponse>(
+          `http://localhost:8080/coinmarketcap/v1/cryptocurrency/quotes/latest?id=${action.ids.join(
+            ","
+          )}`
+        )
+        .pipe(
+          map(
+            ({ status, data }) =>
+              status.error_code === 0
+                ? cmcQuotesFetchSucceeded(Object.values(data))
+                : cmcQuotesFetchFailed(action, status),
+            catchError(error =>
+              of(
+                cmcQuotesFetchFailed(action, {
+                  error_code: -1,
+                  error_message: navigator.onLine
+                    ? "Please connect to the Internet and try again."
+                    : "Sorry, something went wrong."
+                })
+              )
+            )
+          )
+        )
+    )
+  );

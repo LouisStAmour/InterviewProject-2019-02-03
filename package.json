@@ -71,6 +71,8 @@
     "immutable": "^4.0.0-rc.12",
     "react-test-renderer": "^16.7.0",
     "redux": "^4.0.1",
+    "redux-observable": "^1.0.0",
+    "rxjs": "^6.4.0",
     "source-map-loader": "^0.2.4"
   }
 }

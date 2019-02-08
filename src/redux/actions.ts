@@ -25,14 +25,16 @@ export type IAction =
   | IRemoveFromTable
   | ISortTable;
 
-export interface ICMCIDFetch extends Action<typeof Types.CMC_ID_FETCH> {}
+export interface ICMCIDFetch extends Action<typeof Types.CMC_ID_FETCH> {
+  limit: number;
+}
 export interface ICMCIDFetchSucceeded
   extends Action<typeof Types.CMC_ID_FETCH_SUCCEEDED> {
   ids: number[];
 }
 export interface ICMCIDFetchFailed
   extends Action<typeof Types.CMC_ID_FETCH_FAILED> {
-  params: api.ICMCMapRequest;
+  action: ICMCIDFetch;
   status: api.ICMCStatus;
 }
 export interface ICMCQuotesFetch extends Action<typeof Types.CMC_QUOTES_FETCH> {
@@ -44,7 +46,7 @@ export interface ICMCQuotesFetchSucceeded
 }
 export interface ICMCQuotesFetchFailed
   extends Action<typeof Types.CMC_QUOTES_FETCH_FAILED> {
-  params: api.ICMCQuoteRequest;
+  action: ICMCQuotesFetch;
   status: api.ICMCStatus;
 }
 export interface IAddToTable extends Action<typeof Types.ADD_TO_TABLE> {
@@ -62,36 +64,39 @@ export type ISort = {
 };
 export interface ISortTable extends Action<typeof Types.SORT_TABLE>, ISort {}
 
-export const cmcIdFetch = (): ICMCIDFetch => ({ type: Types.CMC_ID_FETCH });
-export const cmcIdFetchSucceed = (ids: number[]): ICMCIDFetchSucceeded => ({
+export const cmcIdFetch = (limit: number): ICMCIDFetch => ({
+  type: Types.CMC_ID_FETCH,
+  limit
+});
+export const cmcIdFetchSucceeded = (ids: number[]): ICMCIDFetchSucceeded => ({
   type: Types.CMC_ID_FETCH_SUCCEEDED,
   ids
 });
 export const cmcIdFetchFailed = (
-  params: api.ICMCMapRequest,
+  action: ICMCIDFetch,
   status: api.ICMCStatus
 ): ICMCIDFetchFailed => ({
   type: Types.CMC_ID_FETCH_FAILED,
   status,
-  params
+  action
 });
 export const cmcQuotesFetch = (ids: number[]): ICMCQuotesFetch => ({
   type: Types.CMC_QUOTES_FETCH,
   ids
 });
-export const cmcQuotesFetchSucceed = (
+export const cmcQuotesFetchSucceeded = (
   quotes: api.ICMCQuoteData[]
 ): ICMCQuotesFetchSucceeded => ({
   type: Types.CMC_QUOTES_FETCH_SUCCEEDED,
   quotes
 });
 export const cmcQuotesFetchFailed = (
-  params: api.ICMCQuoteRequest,
+  action: ICMCQuotesFetch,
   status: api.ICMCStatus
 ): ICMCQuotesFetchFailed => ({
   type: Types.CMC_QUOTES_FETCH_FAILED,
   status,
-  params
+  action
 });
 export const addToTable = (id: number): IAddToTable => ({
   type: Types.ADD_TO_TABLE,
