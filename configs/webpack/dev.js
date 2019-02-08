@@ -1,4 +1,5 @@
 // development config
+require("dotenv").config();
 const merge = require("webpack-merge");
 const webpack = require("webpack");
 const commonConfig = require("./common");
@@ -15,10 +16,13 @@ module.exports = merge(commonConfig, {
     hot: true, // enable HMR on the server
     proxy: {
       "/coinmarketcap": {
-        target: "https://pro-api.coinmarketcap.com",
+        target: process.env.CMC_HOSTNAME,
         secure: false,
         changeOrigin: true,
-        pathRewrite: { "^/coinmarketcap": "" }
+        pathRewrite: { "^/coinmarketcap": "" },
+        headers: {
+          "X-CMC_PRO_API_KEY": process.env.CMC_API_KEY
+        }
       }
     }
   },

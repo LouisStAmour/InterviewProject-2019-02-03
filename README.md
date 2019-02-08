@@ -1,6 +1,8 @@
 # InterviewProject-2019-02-03
 Based on React Webpack Typescript Starter, as documented below. See `redux/` folder for Redux components written and type-checked using TypeScript, and `components/` for the app's components (currently with hardcoded data saved to `tests/__fixtures__`)
 
+Rename `default.env` to `.env` then update it with the API key and API hostname to use, run `yarn start` and visit http://localhost:8080/
+
 # React Webpack Typescript Starter
 > Minimal starter with hot module replacement (HMR) for rapid development.
 
@@ -39,14 +41,14 @@ Based on React Webpack Typescript Starter, as documented below. See `redux/` fol
 
 **All commands**
 
-Command | Description
---- | ---
-`yarn run start-dev` | Build app continuously (HMR enabled) and serve @ `http://localhost:8080`
-`yarn run start-prod` | Build app once (HMR disabled) and serve @ `http://localhost:3000`
-`yarn run build` | Build app to `/dist/`
-`yarn run test` | Run tests
-`yarn run lint` | Run Typescript linter
-`yarn run start` | (alias of `yarn run start-dev`)
+| Command               | Description                                                              |
+| --------------------- | ------------------------------------------------------------------------ |
+| `yarn run start-dev`  | Build app continuously (HMR enabled) and serve @ `http://localhost:8080` |
+| `yarn run start-prod` | Build app once (HMR disabled) and serve @ `http://localhost:3000`        |
+| `yarn run build`      | Build app to `/dist/`                                                    |
+| `yarn run test`       | Run tests                                                                |
+| `yarn run lint`       | Run Typescript linter                                                    |
+| `yarn run start`      | (alias of `yarn run start-dev`)                                          |
 
 **Note**: replace `yarn` with `npm` if you use npm.
 
