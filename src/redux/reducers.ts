@@ -8,10 +8,10 @@ export interface IState {
   cmcQuotes: api.ICMCQuoteData[];
   error: {
     status: api.ICMCStatus;
-    params: api.ICMCMapRequest | api.ICMCQuoteRequest;
+    action: IAction;
   } | null;
   shownInTable: Set<number>;
-  tableSort: ISort | null;
+  tableSort: ISort;
 }
 
 export const reducer: Reducer<IState, IAction> = (
@@ -20,7 +20,7 @@ export const reducer: Reducer<IState, IAction> = (
     cmcQuotes: [],
     error: null,
     shownInTable: Set<number>(),
-    tableSort: null
+    tableSort: { column: "cmc_rank", direction: "asc" }
   },
   action
 ) => {
@@ -45,7 +45,7 @@ export const reducer: Reducer<IState, IAction> = (
       ...state,
       error: {
         status: action.status,
-        params: action.params
+        action: action.action
       }
     };
   } else if (

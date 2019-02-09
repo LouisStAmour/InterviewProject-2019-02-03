@@ -1,6 +1,6 @@
 import { IAction } from "./actions";
 import { createEpicMiddleware, combineEpics } from "redux-observable";
-import { cmcIdEpic, cmcQuoteEpic } from "./api-epics";
+import { cmcIdEpic, cmcQuoteEpic, cmcQuoteAfterIdFetch } from "./api-epics";
 import { createStore, applyMiddleware } from "redux";
 import { reducer } from "./reducers";
 import { compose } from "redux";
@@ -16,7 +16,7 @@ export default function configureStore() {
     reducer,
     composeEnhancers(applyMiddleware(epicMiddleware))
   );
-  const rootEpic = combineEpics(cmcIdEpic, cmcQuoteEpic);
+  const rootEpic = combineEpics(cmcIdEpic, cmcQuoteAfterIdFetch, cmcQuoteEpic);
   epicMiddleware.run(rootEpic);
   return store;
 }

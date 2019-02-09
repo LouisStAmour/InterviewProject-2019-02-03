@@ -10,7 +10,8 @@ import {
   ICMCQuotesFetchSucceeded,
   ICMCQuotesFetchFailed,
   cmcQuotesFetchSucceeded,
-  cmcQuotesFetchFailed
+  cmcQuotesFetchFailed,
+  cmcQuotesFetch
 } from "./actions";
 import { Epic, ofType } from "redux-observable";
 import { ajax } from "rxjs/ajax";
@@ -145,6 +146,12 @@ export const cmcIdEpic: Epic<IAction> = action$ =>
             )
           )
     )
+  );
+
+export const cmcQuoteAfterIdFetch: Epic<IAction> = action$ =>
+  action$.pipe(
+    ofType<IAction, ICMCIDFetchSucceeded>(Types.CMC_ID_FETCH_SUCCEEDED),
+    map(a => cmcQuotesFetch(a.ids))
   );
 
 export const cmcQuoteEpic: Epic<IAction> = action$ =>

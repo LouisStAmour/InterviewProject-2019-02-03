@@ -24,3 +24,11 @@ th {
 tr:nth-of-type(2n) {
   background: #efefef;
 }
+
+a.sort {
+  color: #aaa;
+  text-decoration: none;
+  &.selected {
+    color: #333;
+  }
+}
